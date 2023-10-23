@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Check if Docker is installed
+if ! command -v docker &> /dev/null
+then
+    echo "Docker not found! Installing..."
+    # If macOS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # Using Homebrew for example to install Docker
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew install --cask docker
+        open /Applications/Docker.app
+    # If Linux
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # This assumes a Debian-based distribution
+        sudo apt-get update
+        sudo apt-get install docker-ce docker-ce-cli containerd.io
+        sudo systemctl start docker
+        sudo systemctl enable docker
+    else
+        echo "Unsupported OS!"
+        exit 1
+    fi
+else
+    echo "Docker is already installed!"
+    # Ensure Docker is running
+    open /Applications/Docker.app || sudo systemctl start docker
+fi
+
+# Check if Python3 is installed
+if ! command -v python3 &> /dev/null
+then
+    echo "Python3 not found! Installing..."
+    # If macOS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install python3
+    # If Linux
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get update
+        sudo apt-get install python3 python3-pip
+    else
+        echo "Unsupported OS!"
+        exit 1
+    fi
+else
+    echo "Python3 is already installed!"
+fi
+
+# Kill process running on port 7654
+lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
+
+# Run your Python script here
+python3 app.py
