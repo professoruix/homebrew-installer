@@ -18,6 +18,8 @@ class InstallerScript < Formula
   end
 
   test do
-    # Ideally, add some test cases here.
+   assert_predicate bin/"installer_script", :exist?
+  system "#{bin}/installer_script", "--version"
+  system "#{bin}/installer_script", "--help"
   end
 end

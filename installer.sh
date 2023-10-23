@@ -1,5 +1,37 @@
 #!/bin/bash -i
 
+version="1.0.0"
+
+function show_help {
+    echo "Usage: ${0##*/} [OPTION]..."
+    echo "Set up my environment, including Docker, Python3, and Flask."
+    echo "Optionally executes a Python script after setup."
+    echo ""
+    echo "Options:"
+    echo "  --version           display the version of the script and exit"
+    echo "  --help              display this help and exit"
+    # ... other options ...
+}
+
+# Process command-line options
+while :; do
+    case $1 in
+        --help)
+            show_help
+            exit
+            ;;
+        --version)
+            echo "Installer script version $version"
+            exit
+            ;;
+        *)  # No more options
+            break
+            ;;
+    esac
+    shift
+done
+
+
 # Explicitly set PATH for typical locations and Homebrew
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:$PATH"
 
@@ -68,6 +100,10 @@ fi
 
 # Kill process running on port 7654
 /usr/sbin/lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
+
+APP_DIR=/opt/homebrew/Library/Taps/professoruix/homebrew-installer
+
+cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
 
 # Run Python script
 python3 app.py
