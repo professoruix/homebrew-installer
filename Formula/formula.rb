@@ -1,8 +1,8 @@
 class InstallerScript < Formula
   desc "A script to set up my environment"
-  homepage "https://github.com/user/repo" # your repository URL
-  url "https://github.com/user/repo/archive/v1.0.0.tar.gz" # or the direct URL to your script
-  sha256 "..." # the SHA-256 of the tarball or script
+  homepage "https://github.com/professoruix/installer"
+  url "https://github.com/professoruix/installer/blob/main/installer.sh" # or the direct URL to your script
+  sha256 "faebeb8da80ca8184c42294cf6f02bfdfd9fec510c6cff910ffaa75a9836a2d6" # the SHA-256 of the tarball or script
 
   def install
     bin.install "installer.sh" => "my-installer"
