@@ -30,94 +30,97 @@ while :; do
     shift
 done
 
-if [[ -e /Applications/Docker.app ]]; then
-    open /Applications/Docker.app
-    echo "Waiting for Docker to start..."
-    sleep 30
-else
-    echo "Docker Desktop not found. Consider installing it for the Docker daemon."
-fi
-
-
-# Explicitly set PATH for typical locations and Homebrew
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:$PATH"
-
-# Log the start
+# Start the logging
 echo "Starting script..." >> /tmp/my_script.log
 
-# Update PATH for Homebrew on macOS
+# Separate actions based on OS type
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Actions for macOS
+    echo "Running on macOS..."
+
+    if [[ -e /Applications/Docker.app ]]; then
+        open /Applications/Docker.app
+        echo "Waiting for Docker to start..."
+        sleep 30
+    else
+        echo "Docker Desktop not found. Consider installing it for the Docker daemon."
+    fi
+
+    # Explicitly set PATH for Homebrew on macOS
+    export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:$PATH"
+
+    # Update PATH for Homebrew on macOS
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
 
-# Check for Docker
-if ! command -v docker &> /dev/null; then
-    echo "Docker CLI not found! Installing..."
+    # Install Docker if not present
+    if ! command -v docker &> /dev/null; then
+        echo "Docker CLI not found! Installing..."
+        brew install docker
+        echo "Note: Only Docker CLI is installed. You will need Docker Desktop for the daemon."
+    else
+        echo "Docker CLI is already installed!"
+    fi
 
-    case "$OSTYPE" in
-        "darwin"*)
-            brew install docker
-            echo "Note: Only Docker CLI is installed. You will need Docker Desktop or a VM for the daemon."
-            if [[ -e /Applications/Docker.app ]]; then
-                open /Applications/Docker.app
-            else
-                echo "Docker Desktop not found. Consider installing it for the Docker daemon."
-            fi
-            ;;
-        "linux-gnu"*)
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            ;;
-        *)
-            echo "Unsupported OS!"
-            exit 1
-            ;;
-    esac
+    # Install Python3 if not present
+    if ! command -v python3 &> /dev/null; then
+        echo "Python3 not found! Installing..."
+        brew install python3
+    else
+        echo "Python3 is already installed!"
+    fi
+
+    # Set the app directory path for macOS
+    APP_DIR=/opt/homebrew/Library/Taps/professoruix/homebrew-installer
+
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Actions for Linux
+    echo "Running on Linux..."
+
+    # Check for Docker and install if it's not present
+    if ! command -v docker &> /dev/null; then
+        echo "Docker not found! Installing..."
+        sudo apt-get update
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+        sudo systemctl start docker
+        sudo systemctl enable docker
+    else
+        echo "Docker is already installed!"
+    fi
+
+    # Check for Python3 and install if it's not present
+    if ! command -v python3 &> /dev/null; then
+        echo "Python3 not found! Installing..."
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
+    else
+        echo "Python3 is already installed!"
+    fi
+
+    # Set the app directory path for Linux
+    APP_DIR="$HOME/professoruix/homebrew-installer"  # Adjust this path as needed
+
 else
-    echo "Docker CLI is already installed!"
+    echo "Unsupported OS!"
+    exit 1
 fi
 
-# Check for Python3
-if ! command -v python3 &> /dev/null; then
-    echo "Python3 not found! Installing..."
-
-    case "$OSTYPE" in
-        "darwin"*)
-            brew install python3
-            ;;
-        "linux-gnu"*)
-            sudo apt-get update
-            sudo apt-get install -y python3 python3-pip
-            ;;
-        *)
-            echo "Unsupported OS!"
-            exit 1
-            ;;
-    esac
-else
-    echo "Python3 is already installed!"
-fi
+# Common actions for both macOS and Linux
 
 # Install Flask
-/usr/local/bin/pip3 install Flask
+pip3 install Flask --user
 
-# Kill process running on port 7654
-/usr/sbin/lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
+# Kill process running on port 7654 if any
+lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
 
-APP_DIR=/opt/homebrew/Library/Taps/professoruix/homebrew-installer
-
+# Navigate to the application directory and execute the script
 if [ -d "$APP_DIR" ]; then
     cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
+    python3 app.py
 else
     echo "Error: $APP_DIR does not exist."
     exit 1
 fi
 
-# Run Python script
-python3 app.py
-
-# Log the end
+# End logging
 echo "Finished script!" >> /tmp/my_script.log

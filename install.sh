@@ -1,7 +1,6 @@
 #!/bin/bash
 
 function install_on_mac() {
-    # Check if Homebrew is installed
     if ! command -v brew &>/dev/null; then
         echo "Homebrew not found. Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
