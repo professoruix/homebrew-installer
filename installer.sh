@@ -121,7 +121,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     fi
 
     # Set the app directory path for Linux
-    APP_DIR="$HOME"  # Adjust this path as needed
+    APP_DIR="$HOME/uixlabs_installer"  # Adjust this path as needed
 
 else
     echo "Unsupported OS!"
