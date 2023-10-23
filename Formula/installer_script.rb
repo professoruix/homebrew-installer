@@ -3,6 +3,7 @@ class InstallerScript < Formula
   homepage "https://github.com/professoruix/installer"
   url "https://raw.githubusercontent.com/professoruix/installer/main/installer.sh" # Direct link to the raw script
   sha256 "faebeb8da80ca8184c42294cf6f02bfdfd9fec510c6cff910ffaa75a9836a2d6"
+  version "1.0.0"
 
   def install
     bin.install "installer.sh" => "installer_script"
