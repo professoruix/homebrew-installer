@@ -7,39 +7,55 @@ function install_on_mac() {
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    # Tap your repository which contains the Homebrew formula and install
+    echo "Tapping the repository and installing the script..."
     brew tap professoruix/installer
     brew install installer_script
 }
 
 function install_on_linux() {
-    # Check if curl and apt-transport-https are installed, install if not
-    if ! command -v curl &>/dev/null; then
+    REPO_DIR="$HOME/uixlabs_installer"
+    GIT_REPO_URL="https://github.com/professoruix/installer.git"
+
+    # Check if Git is installed, if not install it
+    if ! command -v git &>/dev/null; then
+        echo "Git not found! Installing..."
         sudo apt-get update
-        sudo apt-get install -y curl
+        sudo apt-get install -y git
     fi
 
-    if ! dpkg -s apt-transport-https &>/dev/null; then
-        sudo apt-get update
-        sudo apt-get install -y apt-transport-https
+    # Clone the repository
+    if [ ! -d "$REPO_DIR" ]; then
+        git clone "$GIT_REPO_URL" "$REPO_DIR" || { echo "Cloning failed! Exiting..."; exit 1; }
+        echo "Repository cloned into $REPO_DIR"
+    else
+        echo "$REPO_DIR already exists. Updating repository..."
+        git -C "$REPO_DIR" pull || { echo "Updating failed! Exiting..."; exit 1; }
     fi
 
-    # Add your repo or installation script here
-    # For instance, if it's a Debian package repo, you might add the repo to the sources list,
-    # then download and install the package using apt-get.
+    # Change to the repository directory
+    cd "$REPO_DIR" || { echo "Changing directory failed! Exiting..."; exit 1; }
 
-    # Since we're pretending this is a Debian package, let's simulate adding the repo and installing
-    echo "deb [trusted=yes] https://repo.example.com/ any main" | sudo tee /etc/apt/sources.list.d/mysoftware.list
-    sudo apt-get update
-    sudo apt-get install -y mysoftware
+    # Check if the installer script exists and is executable
+    if [ ! -x installer.sh ]; then
+        echo "Installer script not found or not executable. Making it executable..."
+        chmod +x installer.sh || { echo "Failed to change script permissions. Exiting..."; exit 1; }
+    fi
+
+    # Run the installer script
+    echo "Running the installer script..."
+    ./installer.sh || { echo "Running installer script failed! Exiting..."; exit 1; }
 }
 
 # Detect the operating system
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "Detected macOS. Proceeding with installation..."
     install_on_mac
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    echo "Detected Linux. Proceeding with installation..."
     install_on_linux
 else
     echo "Unsupported operating system."
     exit 1
 fi
+
+echo "Installation completed successfully."
