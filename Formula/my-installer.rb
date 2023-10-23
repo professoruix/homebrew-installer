@@ -17,7 +17,6 @@ class InstallerScript < Formula
   end
 
   test do
-    # Ideally, a test block should verify the installation. However, your script seems to
-    # require an interactive shell and system changes, so a meaningful test might not be possible.
+
   end
 end
