@@ -80,25 +80,48 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Check for Docker and install if it's not present
     if ! command -v docker &> /dev/null; then
         echo "Docker not found! Installing..."
+        # Update the apt package index and install packages to allow apt to use a repository over HTTPS
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+
+        # Add Docker’s official GPG key
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+        # Set up the stable repository
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+        # Install Docker Engine
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-        sudo systemctl start docker
+
+        # Manage Docker as a non-root user
+        sudo groupadd docker
+        sudo usermod -aG docker $USER
+        newgrp docker
+
+        # Enable and start Docker
         sudo systemctl enable docker
+        sudo systemctl start docker
     else
         echo "Docker is already installed!"
     fi
 
-    # Check for Python3 and install if it's not present
+    # Check for Python3 and pip3 and install if they're not present
     if ! command -v python3 &> /dev/null; then
         echo "Python3 not found! Installing..."
         sudo apt-get update
-        sudo apt-get install -y python3 python3-pip
+        sudo apt-get install -y python3
+    fi
+
+    if ! command -v pip3 &> /dev/null; then
+        echo "pip3 not found! Installing..."
+        sudo apt-get install -y python3-pip
     else
-        echo "Python3 is already installed!"
+        echo "Python3 and pip3 are already installed!"
     fi
 
     # Set the app directory path for Linux
-    APP_DIR="$HOME/professoruix/homebrew-installer"  # Adjust this path as needed
+    APP_DIR="$HOME"  # Adjust this path as needed
 
 else
     echo "Unsupported OS!"
