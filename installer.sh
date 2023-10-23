@@ -10,7 +10,6 @@ function show_help {
     echo "Options:"
     echo "  --version           display the version of the script and exit"
     echo "  --help              display this help and exit"
-    # ... other options ...
 }
 
 # Process command-line options
@@ -30,6 +29,14 @@ while :; do
     esac
     shift
 done
+
+if [[ -e /Applications/Docker.app ]]; then
+    open /Applications/Docker.app
+    echo "Waiting for Docker to start..."
+    sleep 30
+else
+    echo "Docker Desktop not found. Consider installing it for the Docker daemon."
+fi
 
 
 # Explicitly set PATH for typical locations and Homebrew
@@ -52,7 +59,6 @@ if ! command -v docker &> /dev/null; then
         "darwin"*)
             brew install docker
             echo "Note: Only Docker CLI is installed. You will need Docker Desktop or a VM for the daemon."
-            # Check if Docker Desktop is installed
             if [[ -e /Applications/Docker.app ]]; then
                 open /Applications/Docker.app
             else
@@ -103,7 +109,12 @@ fi
 
 APP_DIR=/opt/homebrew/Library/Taps/professoruix/homebrew-installer
 
-cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
+if [ -d "$APP_DIR" ]; then
+    cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
+else
+    echo "Error: $APP_DIR does not exist."
+    exit 1
+fi
 
 # Run Python script
 python3 app.py
