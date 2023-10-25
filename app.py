@@ -2,10 +2,13 @@ import os
 import shutil
 import subprocess
 import time
+from flask_cors import CORS
 
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "*", "headers": "*"}})
 
 
 class EditorService:

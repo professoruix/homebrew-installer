@@ -41,7 +41,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [[ -e /Applications/Docker.app ]]; then
         open /Applications/Docker.app
         echo "Waiting for Docker to start..."
-        sleep 30
+        sleep 5
     else
         echo "Docker Desktop not found. Consider installing it for the Docker daemon."
     fi
@@ -132,6 +132,7 @@ fi
 
 # Install Flask
 pip3 install Flask --user
+pip3 install flask_cors --user
 
 # Kill process running on port 7654 if any
 lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
