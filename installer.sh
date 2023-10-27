@@ -138,13 +138,13 @@ pip3 install flask_cors --user
 lsof -t -i:7654 | xargs kill -9 2>/dev/null || true
 
 # Navigate to the application directory and execute the script
-if [ -d "$APP_DIR" ]; then
-    cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
-    python3 app.py
-else
-    echo "Error: $APP_DIR does not exist."
-    exit 1
-fi
+#if [ -d "$APP_DIR" ]; then
+#    cd "$APP_DIR" || { echo "Error: Failed to change directory to $APP_DIR"; exit 1; }
+python3 app.py
+#else
+#    echo "Error: $APP_DIR does not exist."
+#    exit 1
+#fi
 
 # End logging
 echo "Finished script!" >> /tmp/my_script.log

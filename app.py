@@ -208,5 +208,10 @@ def update_and_run_endpoint():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/health', methods=['GET'])
+def index():
+    return jsonify({'message': 'Yay, it is working and running fine !'})
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=7654)
