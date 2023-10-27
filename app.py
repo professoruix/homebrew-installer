@@ -76,7 +76,7 @@ class EditorService:
 
         EditorService._create_dockerfile(temp_dir)
 
-        image_name = "temp_image"
+        image_name = f"{repo_name}"
         cmd = ['docker', 'build', '-t', image_name, temp_dir]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
@@ -110,7 +110,7 @@ class EditorService:
 
     def clone_update_and_run_repo(self, repo_url, file_path, repo_name):
         temp_dir = f"/tmp/{repo_name}"
-        image_name = "temp_image"
+        image_name = f"{repo_name}"
 
         if not os.path.exists(temp_dir):
             self.run_repo(repo_url, repo_name)
@@ -123,7 +123,7 @@ class EditorService:
     @staticmethod
     def update_and_run_repo(file_path, repo_name):
         temp_dir = f"/tmp/{repo_name}"
-        image_name = "temp_image"
+        image_name = f"{repo_name}"
 
         start_time = time.time()
 
