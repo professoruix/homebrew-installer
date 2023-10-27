@@ -106,6 +106,18 @@ class EditorService:
 
         return f"App is running. Access it at {access_url}. Container ID: {container_id}"
 
+    def clone_update_and_run_repo(self, repo_url, file_path):
+        temp_dir = "/tmp/repo_clone"
+        image_name = "temp_image"
+
+        if not os.path.exists(temp_dir):
+            self.run_repo(repo_url)
+
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'File not found after cloning'}), 404
+
+        return self.update_and_run_repo(file_path)
+
     @staticmethod
     def update_and_run_repo(file_path):
         temp_dir = "/tmp/repo_clone"
@@ -202,6 +214,30 @@ def update_and_run_endpoint():
         uploaded_file.save(file_path)
 
         result = editor_service.update_and_run_repo(file_path)
+
+        return jsonify({"message": result}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/clone-update-and-run', methods=['POST'])
+def clone_update_and_run_endpoint():
+    try:
+        data = request.form
+        repo_url = data.get('repo_url')
+
+        if 'file' not in request.files:
+            return jsonify({'error': 'File not found in the request'}), 400
+
+        uploaded_file = request.files['file']
+
+        if uploaded_file.filename == '' or not uploaded_file:
+            return jsonify({'error': 'File name and file data are required'}), 400
+
+        file_path = os.path.join("/tmp", uploaded_file.filename)
+        uploaded_file.save(file_path)
+
+        result = editor_service.clone_update_and_run_repo(repo_url, file_path)
 
         return jsonify({"message": result}), 200
     except Exception as e:
