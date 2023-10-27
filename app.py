@@ -106,7 +106,8 @@ class EditorService:
 
         access_url = f"http://localhost:{port}"
 
-        return f"App is running. Access it at {access_url}. Container ID: {container_id}"
+        return jsonify({"message": f"App is running. Access it at {access_url}. Container ID: {container_id}",
+                        "url": access_url}), 200
 
     def clone_update_and_run_repo(self, repo_url, file_path, repo_name):
         temp_dir = f"/tmp/{repo_name}"
@@ -154,8 +155,8 @@ class EditorService:
             container_id = run_result.stdout.strip()
             access_url = f"http://localhost:{port}"
 
-            return f"App is running. Access it at {access_url}. Container ID: {container_id}",
-
+            return jsonify({"message": f"App is running. Access it at {access_url}. Container ID: {container_id}",
+                            "url": access_url}), 200
         except subprocess.CalledProcessError as e:
             error_message = f"Error running Docker command: {e.stderr}"
             return jsonify({'error': error_message}), 500
