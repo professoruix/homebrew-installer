@@ -43,10 +43,12 @@ class EditorService:
     CMD ["flask", "run", "--host=0.0.0.0", "--port=4567"]
     """
         elif is_node:
-            content = """FROM node:16
-    WORKDIR /usr/src/app
+            content = """
+    FROM node:16-alpine
+    WORKDIR /app
     COPY . .
     RUN npm install
+    EXPOSE 8000
     CMD ["npm", "start"]
     """
         else:
@@ -56,8 +58,8 @@ class EditorService:
             file.write(content)
 
     @staticmethod
-    def run_repo(repo_url):
-        temp_dir = "/tmp/repo_clone"
+    def run_repo(repo_url, repo_name):
+        temp_dir = f"/tmp/{repo_name}"
 
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
@@ -87,7 +89,7 @@ class EditorService:
         if is_python:
             port = '4567'
         elif is_node:
-            port = '5678'
+            port = '8000'
         else:
             raise ValueError("Unknown project type. Ensure it's a Python Flask or Node.js project.")
 
@@ -106,21 +108,21 @@ class EditorService:
 
         return f"App is running. Access it at {access_url}. Container ID: {container_id}"
 
-    def clone_update_and_run_repo(self, repo_url, file_path):
-        temp_dir = "/tmp/repo_clone"
+    def clone_update_and_run_repo(self, repo_url, file_path, repo_name):
+        temp_dir = f"/tmp/{repo_name}"
         image_name = "temp_image"
 
         if not os.path.exists(temp_dir):
-            self.run_repo(repo_url)
+            self.run_repo(repo_url, repo_name)
 
         if not os.path.exists(file_path):
             return jsonify({'error': 'File not found after cloning'}), 404
 
-        return self.update_and_run_repo(file_path)
+        return self.update_and_run_repo(file_path, repo_name)
 
     @staticmethod
-    def update_and_run_repo(file_path):
-        temp_dir = "/tmp/repo_clone"
+    def update_and_run_repo(file_path, repo_name):
+        temp_dir = f"/tmp/{repo_name}"
         image_name = "temp_image"
 
         start_time = time.time()
@@ -139,14 +141,13 @@ class EditorService:
             if is_python:
                 port = '4567'
             elif is_node:
-                port = '5678'
+                port = '8000'
             else:
                 raise ValueError("Unknown project type. Ensure it's a Python Flask or Node.js project.")
 
             # Stop any container running on the target port
             EditorService._stop_container_on_port(port)
 
-            # Run the Docker image in detached mode with volume mount
             cmd = ['docker', 'run', '--rm', '-d', '-p', f"{port}:{port}", '-v', f"{temp_dir}:/app", image_name]
             run_result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
@@ -225,6 +226,7 @@ def clone_update_and_run_endpoint():
     try:
         data = request.form
         repo_url = data.get('repo_url')
+        repo_name = data.get('repo_name')
 
         if 'file' not in request.files:
             return jsonify({'error': 'File not found in the request'}), 400
@@ -237,7 +239,7 @@ def clone_update_and_run_endpoint():
         file_path = os.path.join("/tmp", uploaded_file.filename)
         uploaded_file.save(file_path)
 
-        result = editor_service.clone_update_and_run_repo(repo_url, file_path)
+        result = editor_service.clone_update_and_run_repo(repo_url, file_path, repo_name)
 
         return jsonify({"message": result}), 200
     except Exception as e:
